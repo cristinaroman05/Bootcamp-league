@@ -1,5 +1,8 @@
 import express, { type NextFunction, type Response, type Request, type ErrorRequestHandler } from "express";
 import { mongoConnect } from "../domain/repositories/mongo-repository";
+import { userRouter } from "./user.routes";
+import { teamRouter } from "./team.routes";
+import { matchRouter } from "./match.routes";
 
 
 export const configureRoutes = (app: any): any => {
@@ -24,6 +27,9 @@ export const configureRoutes = (app: any): any => {
 
   // Usamos las rutas
   app.use("/public", express.static("public"));
+  app.use("/user", userRouter);
+  app.use("/team", teamRouter);
+  app.use("/match", matchRouter);
   app.use("/", router);
 
   return app;

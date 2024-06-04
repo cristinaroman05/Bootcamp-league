@@ -21,7 +21,7 @@ const getUserCount = async (): Promise<number> => {
   return await User.countDocuments();
 };
 
-const getUserById = async (id: string): Promise<Document<IUser> | null> => {
+const getUserById = async (id: string): Promise<Document<IUserCreate> | any> => {
   return await User.findById(id).populate("team");
 };
 

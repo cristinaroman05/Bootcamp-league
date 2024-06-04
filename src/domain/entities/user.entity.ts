@@ -1,7 +1,7 @@
 import { Document, Schema, model } from "mongoose";
 import validator from "validator";
 import bcrypt from "bcrypt";
-// import { Team, ITeam } from "./team.entity";
+import { ITeam, Team } from "./team.entity";
 
 export enum ROL {
   "PLAYER" = "PLAYER",
@@ -14,7 +14,7 @@ export interface IUserCreate {
   password: string;
   firstName: string;
   lastName: string;
-  team?: string;
+  team?: ITeam;
   logo?: string;
   rol?: ROL;
 }
@@ -53,9 +53,9 @@ const userSchema = new Schema<IUserCreate>(
       minLength: 3,
     },
     team: {
-      // type: Schema.Types.ObjectId,
-      // ref: Team,
-      // required: false,
+      type: Schema.Types.ObjectId,
+      ref: Team,
+      required: false,
     },
     logo: {
       type: String,

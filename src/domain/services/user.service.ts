@@ -5,19 +5,27 @@ import { userOdm } from "../odm/user.odm";
 
 export const getUsers = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    let response = {};
-    const totalElements = await userOdm.getUserCount();
+
+    // Only for admins and users
+    if (req.user.rol !== "ADMIN" ) {
+      res.status(401).json({ error: "No tienes autorización para hacer esto" });
+      return;
+    }
+
+    // Ternario que se queda con el parametro si llega
     const page = req.query.page ? parseInt(req.query.page as string) : 1;
     const limit = req.query.limit ? parseInt(req.query.limit as string) : 10;
+
     const user = await userOdm.getUserById(req.user.id);
-    const freeUsers = (await userOdm.getFreeUsers(page, limit)) || [];
-    const usersWithTeam = (await userOdm.getBusyUsers(page, limit)) || [];
-    const teamUsers = (await userOdm.getTeamUsers(page, limit, user?.toObject().team)) || [];
-    response = {
-      totalItems: req.user.rol === "ADMIN" ? totalElements : req.user.rol === "MANAGER" ? teamUsers.length + freeUsers.length : teamUsers.length,
+
+    // Num total de elementos
+    const totalElements = await userOdm.getUserCount();
+
+    const response = {
+      totalItems: totalElements,
       totalPages: Math.ceil(totalElements / limit),
       currentPage: page,
-      data: req.user.rol === "ADMIN" ? { usersWithTeam, freeUsers } : req.user.rol === "MANAGER" ? { teamUsers, freeUsers } : { teamUsers },
+      data: user,
     };
 
     res.json(response);
@@ -30,7 +38,7 @@ export const getUserById = async (req: Request, res: Response, next: NextFunctio
   try {
     const userIdToShow = req.params.id;
 
-    // Only for admins and same users
+    // Only for admins and teachers
     if (req.user.rol !== "ADMIN" && req.user.id !== userIdToShow) {
       res.status(401).json({ error: "No tienes autorización para hacer esto" });
       return;
@@ -51,7 +59,13 @@ export const getUserById = async (req: Request, res: Response, next: NextFunctio
 
 export const createUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const createdUser = await userOdm.createUser({ ...req.body, rol: "PLAYER" });
+    // Only for admins
+    if (req.user.rol !== "ADMIN") {
+      res.status(401).json({ error: "No tienes autorización para hacer esto" });
+      return;
+    }
+
+    const createdUser = await userOdm.createUser(req.body);
     res.status(201).json(createdUser);
   } catch (error) {
     next(error);
@@ -80,28 +94,23 @@ export const deleteUser = async (req: Request, res: Response, next: NextFunction
 
 export const updateUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
+    // Only for admins
+    if (req.user.rol !== "ADMIN") {
+      res.status(401).json({ error: "No tienes autorización para hacer esto" });
+      return;
+    }
+
     const id = req.params.id;
     const userToUpdate = await userOdm.getUserById(id);
-    const userRequester = await userOdm.getUserById(req.user.id);
-    let data = {};
     if (userToUpdate) {
-      if (req.user.rol === "ADMIN") {
-        data = req.body;
-      } else if (req.user.rol === "MANAGER" && req.user.id !== id) {
-        if (userRequester?.toObject().team?._id?.toString() === userToUpdate.toObject().team?._id?.toString()) {
-          data = { team: null };
-        } else if (userToUpdate.toObject().team === null) {
-          data = { team: userRequester?.toObject().team };
-        }
-      } 
-      Object.assign(userToUpdate, data);
+      Object.assign(userToUpdate, req.body);
       await userToUpdate.save();
       // Quitamos pass de la respuesta
       const userToSend: any = userToUpdate.toObject();
       delete userToSend.password;
       res.json(userToSend);
     } else {
-      res.status(404).json({ error: "Usuario no encontrado" });
+      res.status(404).json({});
     }
   } catch (error) {
     next(error);
@@ -135,13 +144,7 @@ export const login = async (req: Request, res: Response, next: NextFunction): Pr
     // Generamos token JWT
     const jwtToken = generateToken(user._id.toString(), user.email);
 
-    const userToSend = user.toObject();
-    delete userToSend.password;
-
-    res.status(200).json({
-      token: jwtToken,
-      user: userToSend,
-    });
+    res.status(200).json({ token: jwtToken });
   } catch (error) {
     next(error);
   }
