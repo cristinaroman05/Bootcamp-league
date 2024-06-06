@@ -81,7 +81,6 @@ export const createMatch = async (req: Request, res: Response, next: NextFunctio
       const id = objeto._id;
       teams.push(id);
 
-      // Hacer algo con los datos...
     });
 
     const orderTeam = [...teams];
@@ -138,9 +137,8 @@ export const createMatch = async (req: Request, res: Response, next: NextFunctio
         const match: IMatchCreate = {
           localTeam: matchToOrder[0],
           awayTeam: matchToOrder[1],
-          score,
+          score:"",
           round: numActRound,
-          winner: "",
           matchDate: `${day}/${month}/${year}`,
         };
         await matchOdm.createMatch(match);
@@ -181,7 +179,6 @@ export const createMatch = async (req: Request, res: Response, next: NextFunctio
           awayTeam: matchToOrder[1],
           score,
           round: numActRound,
-          winner: "",
           matchDate: `${day}/${month}/${year}`,
         };
         await matchOdm.createMatch(match);

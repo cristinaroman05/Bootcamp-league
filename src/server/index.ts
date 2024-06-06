@@ -6,6 +6,7 @@ import { configureRoutes } from "../routes/index";
 import dotenv from "dotenv";
 dotenv.config();
 
+const FRONT_END_URL: string = process.env.FRONT_END_URL as string;
 
 
 // Configuración del server
@@ -14,7 +15,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(
   cors({
-    origin: "http://localhost:3000/",
+    origin: FRONT_END_URL,
   })
 );
 

@@ -6,7 +6,9 @@ export interface IMatchCreate {
   awayTeam: ITeam;
   goalsLocalTeam?: number;
   goalsAwayTeam?: number;
-  matchDate: Date;
+  score: string;
+  round: number;
+  matchDate: String;
 }
 
 export type IMatch = IMatchCreate & Document;
@@ -33,6 +35,16 @@ const matchSchema = new Schema<IMatchCreate>(
       required: false,
     },
     goalsAwayTeam: {
+      type: Number,
+      trim: true,
+      required: false,
+    },
+    score: {
+      type: String,
+      trim: true,
+      required: false,
+    },
+    round: {
       type: Number,
       trim: true,
       required: false,
