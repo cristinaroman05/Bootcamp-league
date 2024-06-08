@@ -3,11 +3,7 @@ import { teamOdm } from "../odm/team.odm";
 
 export const getTeams = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    // Only for admins
-    if (req.user.rol !== "ADMIN") {
-      res.status(401).json({ error: "No tienes autorización para hacer esto" });
-      return;
-    }
+    
 
     // Ternario que se queda con el parametro si llega
     const page = req.query.page ? parseInt(req.query.page as string) : 1;

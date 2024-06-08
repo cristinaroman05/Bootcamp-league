@@ -1,9 +1,12 @@
 import { Document, Schema, model } from "mongoose";
+import { IUser, User } from "./user.entity";
+import isURL from "validator/lib/isURL";
 
 export interface ITeamCreate {
   name: string;
   alias: string;
-  logo: string;
+  logo?: string;
+  players?: IUser[];
 }
 
 export type ITeam = ITeamCreate & Document;
@@ -20,12 +23,18 @@ const teamSchema = new Schema<ITeamCreate>({
     type: String,
     trim: true,
     required: true,
-    maxlength: [3, "El alias del equipo debe tener máximo 3 letras"]
+    maxlength: [20, "El alias del equipo debe tener máximo 20 letras"]
   },
   logo: {
     type: String,
     trim: true,
-    required: true,
+    required: false,
+  },
+  players: {
+    type: Schema.Types.ObjectId,
+    ref: "User",
+    trim: true,
+    required: false,
   },
 }, {
   timestamps: true,

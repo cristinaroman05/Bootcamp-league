@@ -59,12 +59,6 @@ export const getUserById = async (req: Request, res: Response, next: NextFunctio
 
 export const createUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    // Only for admins
-    if (req.user.rol !== "ADMIN") {
-      res.status(401).json({ error: "No tienes autorización para hacer esto" });
-      return;
-    }
-
     const createdUser = await userOdm.createUser(req.body);
     res.status(201).json(createdUser);
   } catch (error) {
@@ -143,8 +137,12 @@ export const login = async (req: Request, res: Response, next: NextFunction): Pr
 
     // Generamos token JWT
     const jwtToken = generateToken(user._id.toString(), user.email);
-
-    res.status(200).json({ token: jwtToken });
+    const userToSend = user.toObject();
+    delete userToSend.password
+    res.status(200).json({ 
+      token: jwtToken,
+      user: userToSend,
+     });
   } catch (error) {
     next(error);
   }

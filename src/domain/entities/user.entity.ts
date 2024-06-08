@@ -67,6 +67,7 @@ const userSchema = new Schema<IUserCreate>(
       type: String,
       required: false,
       enum: ROL,
+      default: ROL.PLAYER
     },
   },
   {
